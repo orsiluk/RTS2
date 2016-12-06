@@ -1,1 +1,3 @@
-# RTS2
+# RTS
+
+Project for Real Time and Embedded Systems
