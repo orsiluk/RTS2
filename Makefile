@@ -25,34 +25,12 @@ APP_HEADERS=Include/GenericTypeDefs.h \
    Include/Compiler.h \
    Include/HardwareProfile.h 
 
-clock : Objects/clock.o $(OBJECTS)
-	$(LD) $(LDFLAGS) Objects/clock.o $(OBJECTS)
+dhcp : Objects/dhcp.o $(OBJECTS)
+	$(LD) $(LDFLAGS) Objects/dhcp.o $(OBJECTS)
 
-test : Objects/test.o $(OBJECTS)
-	$(LD) $(LDFLAGS) Objects/test.o $(OBJECTS)
-
-testint : Objects/testint.o $(OBJECTS)
-	$(LD) $(LDFLAGS) Objects/testint.o $(OBJECTS)
-
-led : Objects/led.o
-	$(LD) $(LDFLAGS) Objects/led.o
-
-Objects/clock.o : clock.c $(SDCC_HEADERS) $(SDCC_PIC16_HEADERS) \
+Objects/dhcp.o : dhcp.c $(SDCC_HEADERS) $(SDCC_PIC16_HEADERS) \
    $(APP_HEADERS) $(TCPIP_HEADERS)
-	$(CC) $(CFLAGS) clock.c
-
-Objects/testint.o : testint.c $(SDCC_HEADERS) $(SDCC_PIC16_HEADERS) \
-   $(APP_HEADERS) $(TCPIP_HEADERS)
-	$(CC) $(CFLAGS) testint.c
-
-Objects/test.o : test.c $(SDCC_HEADERS) $(SDCC_PIC16_HEADERS) \
-   $(APP_HEADERS) $(TCPIP_HEADERS)
-	$(CC) $(CFLAGS) test.c
-
-Objects/led.o : led.c $(SDCC_HEADERS) $(SDCC_PIC16_HEADERS) \
-   $(APP_HEADERS) $(TCPIP_HEADERS)
-	$(CC) $(CFLAGS) led.c
-
+	$(CC) $(CFLAGS) dhcp.c
 
 Objects/LCDBlocking.o : TCPIP_Stack/LCDBlocking.c $(SDCC_HEADERS)  \
    $(SDCC_PIC16_HEADERS) $(APP_HEADERS) $(TCPIP_HEADERS)
