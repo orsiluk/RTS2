@@ -59,14 +59,22 @@
 
 #define __18F97J60
 #define __SDCC__
-#define DIVISOR 250
-#define LOW (0xFFFF - DIVISOR) & 0xFF
+
 
 #include "../Include/HardwareProfile.h"
 #include "../Include/TCPIP_Stack/TCPIP.h" //ML
+//#include "Include/share.h"
 
 
 #if defined(USE_LCD)
+
+#ifndef DIVISOR
+#define DIVISOR 250
+#endif
+
+#ifndef LOW
+#define LOW (0xFFFF - DIVISOR) & 0xFF
+#endif
 
 
 
@@ -77,6 +85,8 @@
 // LCDText is a 32 byte shadow of the LCD text.  Write to it and 
 // then call LCDUpdate() to copy the string into the LCD module.
 BYTE LCDText[16*2+1];
+extern void high_isr (void);
+extern unsigned int ticks;
 
 /******************************************************************************
  * Function:        static void LCDWrite(BYTE RS, BYTE Data)
@@ -190,23 +200,6 @@ static void LCDWrite(BYTE RS, BYTE Data)
 //	LCD_RD_WR_TRIS = 1;
 }
 
-unsigned int ticks;
-//sdfigoölabjglsdf
-
-void high_isr (void) interrupt 1
-{
-	if (INTCONbits.TMR0IF)
-	{
-		INTCONbits.TMR0IE = 0;  // Disable TMR0 interrupts
-
-		ticks = (ticks == 0xFFFF)? 0 : ticks + 1;	//Increase ticks (Ring)
-
-		TMR0H = 0xFF;			// Reset timer values
-		TMR0L = LOW;
-		INTCONbits.TMR0IE = 1;  // Enable TMR0 interrupts
-		INTCONbits.TMR0IF = 0;  // Reset TMR0 flag
-	}
-}
 	/*
 	//Set delay
 	unsigned int start = ticks, multiplier, some_other_multiplier;
@@ -288,7 +281,7 @@ void LCDInit(void)
 
 
 	// Wait the required time for the LCD to reset
-	//DelayMs(40);
+	DelayMs(40);
 
 
 	// Set the default function
