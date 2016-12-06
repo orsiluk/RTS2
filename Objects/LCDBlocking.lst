@@ -1,4 +1,4 @@
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE  1
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -7,7 +7,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                00001 ;--------------------------------------------------------
                00002 ; File Created by SDCC : free open source ANSI-C Compiler
                00003 ; Version 2.9.4 #5595 (Nov 15 2016) (Mac OS X ppc)
-               00004 ; This file was generated Tue Dec  6 13:20:19 2016
+               00004 ; This file was generated Tue Dec  6 13:35:25 2016
                00005 ;--------------------------------------------------------
                00006 ; PIC16 port for the Microchip 16-bit core micros
                00007 ;--------------------------------------------------------
@@ -58,7 +58,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                00052         extern _TXSTA2bits
                00053         extern _CCP5CONbits
                00054         extern _CCP4CONbits
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE  2
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -118,7 +118,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                00106         extern _IPR2bits
                00107         extern _PIE3bits
                00108         extern _PIR3bits
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE  3
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE  3
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -178,7 +178,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                00160         extern _MAADR2
                00161         extern _EBSTSD
                00162         extern _EBSTCON
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE  4
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE  4
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -238,7 +238,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                00214         extern _EPMOH
                00215         extern _EWOLIE
                00216         extern _EWOLIR
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE  5
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE  5
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -298,7 +298,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                00268         extern _TXREG2
                00269         extern _RCREG2
                00270         extern _SPBRG2
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE  6
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE  6
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -358,7 +358,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                00322         extern _TRISE
                00323         extern _DDRF
                00324         extern _TRISF
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE  7
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE  7
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -418,7 +418,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                00376         extern _ADCON2
                00377         extern _ADCON1
                00378         extern _ADCON0
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE  8
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE  8
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -478,7 +478,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                00430         extern _INTCON2
                00431         extern _INTCON
                00432         extern _PROD
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE  9
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE  9
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -538,7 +538,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                00484 
                00485 udata_LCDBlocking_1     udata
                00486 _LCDText        res     33
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 10
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 10
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -598,7 +598,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0060 0EFF      00538         MOVLW   0xff
 0062 2200      00539         ADDWFC  r0x03, F
 0064 5000      00540         MOVF    r0x04, W
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 11
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 11
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -658,7 +658,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 003A 26E1      00592         ADDWF   FSR1L, F
                00593 ;       .line   390; TCPIP_Stack/LCDBlocking.c  DelayMs(2);
 003C 0E48      00594         MOVLW   0x48
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 12
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 12
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -718,7 +718,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 00A8 C000 F000 00646         MOVFF   r0x01, r0x02
 00AC 6A00      00647         CLRF    r0x03
 00AE 0E00      00648         MOVLW   0x00
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 13
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 13
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -778,7 +778,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 011C 0EFF      00700         MOVLW   0xff
 011E 2200      00701         ADDWFC  r0x02, F
 0120 0EFF      00702         MOVLW   0xff
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 14
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 14
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -838,7 +838,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0186 5C00      00754         SUBWF   r0x02, W
 0188 E100      00755         BNZ     _00304_DS_
 018A 0E20      00756         MOVLW   0x20
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 15
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 15
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -898,7 +898,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 01F0 C000 FFEA 00808         MOVFF   r0x02, FSR0H
 01F4 CFEF F000 00809         MOVFF   INDF0, r0x01
 01F8 5000      00810         MOVF    r0x01, W
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 16
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 16
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -958,7 +958,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0004 CFE1 FFD9 00862         MOVFF   FSR1L, FSR2L
 0008 C000 FFE5 00863         MOVFF   r0x00, POSTDEC1
 000C C000 FFE5 00864         MOVFF   r0x01, POSTDEC1
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 17
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 17
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1018,7 +1018,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                00916 ;       .line   267; TCPIP_Stack/LCDBlocking.c  INTCONbits.TMR0IE=0;  //enable timer0 interrupts
 006C 9A00      00917         BCF     _INTCONbits, 5
                00918 ;       .line   268; TCPIP_Stack/LCDBlocking.c  INTCON2bits.TMR0IP=1; //TMR0 has high prio
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 18
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 18
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1078,7 +1078,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 00C6 1000      00970         IORWF   r0x07, W
 00C8 1000      00971         IORWF   r0x08, W
 00CA E100      00972         BNZ     _00163_DS_
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 19
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 19
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1138,7 +1138,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0134 2600      01024         ADDWF   r0x00, F
 0136 0EFF      01025         MOVLW   0xff
 0138 2200      01026         ADDWFC  r0x01, F
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 20
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 20
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1198,7 +1198,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 01A2 6E00      01078         MOVWF   r0x00
 01A4 6A00      01079         CLRF    r0x01
 01A6 6A00      01080         CLRF    r0x02
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 21
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 21
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1258,7 +1258,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0218 E100      01132         BNZ     _00193_DS_
 021A CFE4 F000 01133         MOVFF   PREINC1, r0x08
 021E CFE4 F000 01134         MOVFF   PREINC1, r0x07
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 22
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 22
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1318,7 +1318,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0058 6E00      01186         MOVWF   r0x00
 005A 0E00      01187         MOVLW   0x00
 005C 0000      01188         BANKSEL (_ticks + 1)
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 23
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 23
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1378,7 +1378,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0024 5000      01240         MOVF    r0x00, W
 0026 0B01      01241         ANDLW   0x01
 0028 44E8      01242         RLNCF   WREG, W
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 24
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 24
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1421,7 +1421,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                01277 ; access size:      9 (0x0009) bytes
                01278 
                01279 
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 25
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 25
 
 
 SYMBOL TABLE
@@ -1480,7 +1480,7 @@ _ADCON1bits                       00000000
 _ADCON2                           00000000
 _ADCON2bits                       00000000
 _ADRES                            00000000
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 26
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 26
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1540,7 +1540,7 @@ _DDRC                             00000000
 _DDRCbits                         00000000
 _DDRD                             00000000
 _DDRDbits                         00000000
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 27
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 27
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1600,7 +1600,7 @@ _EDMASTH                          00000000
 _EDMASTL                          00000000
 _EECON1                           00000000
 _EECON1bits                       00000000
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 28
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 28
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1660,7 +1660,7 @@ _ESTAT                            00000000
 _ESTATbits                        00000000
 _ETXND                            00000000
 _ETXNDH                           00000000
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 29
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 29
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1720,7 +1720,7 @@ _LCDErase                         00000000
 _LCDInit                          00000000
 _LCDText                          00000000
 _LCDUpdate                        00000000
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 30
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 30
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1780,7 +1780,7 @@ _PIE1bits                         00000000
 _PIE2                             00000000
 _PIE2bits                         00000000
 _PIE3                             00000000
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 31
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 31
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1840,7 +1840,7 @@ _RCSTA1                           00000000
 _RCSTA1bits                       00000000
 _RCSTA2                           00000000
 _RCSTA2bits                       00000000
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 32
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 32
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1900,7 +1900,7 @@ _TMR0H                            00000000
 _TMR0L                            00000000
 _TMR1H                            00000000
 _TMR1L                            00000000
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 33
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 33
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -1960,7 +1960,7 @@ r0x01                             00000001
 r0x02                             00000002
 r0x03                             00000003
 r0x04                             00000004
-gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:20:19          PAGE 34
+gpasm-0.13.7 beta               Objects/LCDBlocking.asm12-6-2016  13:35:25          PAGE 34
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
