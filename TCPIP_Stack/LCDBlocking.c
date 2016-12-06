@@ -246,19 +246,7 @@ void LCDInit(void)
 	LCD_E_IO = 0;
 	LCD_RD_WR_IO = 0;
 
-	// TMR0 SETUP
-	TMR0H = 0xFF;
-	TMR0L = LOW;
-	T0CONbits.TMR0ON = 0; //stop timer
-	T0CONbits.T08BIT = 0;  //16bit
-	T0CONbits.T0CS = 0;   //Clock source = instruction cycle CLK
-	T0CONbits.T0SE = 0;   //Rising edge
-	T0CONbits.PSA = 1;    //No prescaler
-
-	//  INTERRUPT CONFIG
-	INTCONbits.GIE = 1;   //enable global interrupts
-	INTCONbits.TMR0IE=0;  //enable timer0 interrupts
-	INTCON2bits.TMR0IP=1; //TMR0 has high prio
+	
 
 
 	#if defined(LCD_DATA_TRIS)
@@ -281,8 +269,9 @@ void LCDInit(void)
 
 
 	// Wait the required time for the LCD to reset
-	DelayMs(40);
-
+	//DelayMs(40);
+	//unsigned int start = ticks, i = 0;
+	//while (ticks - start != 4000 || (0xFFFF - start) + ticks != 4000);
 
 	// Set the default function
 	// Go to 8-bit mode first to reset the instruction state machine
