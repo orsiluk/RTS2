@@ -60,6 +60,27 @@ static int Receive() {
 }
 
 void ReceiveInput(UDP_SOCKET listen) {
+
+	/**	// DHCP or BOOTP Header structure
+	typedef struct __attribute__((aligned(2), packed))
+	{
+		BYTE		MessageType;	// Message type for this message
+		BYTE		HardwareType;	// Hardware type for this message
+		BYTE		HardwareLen;	// Length of hardware type
+		BYTE		Hops;			// Number of hops
+		DWORD		TransactionID;	// DHCP Transaction ID
+		WORD		SecondsElapsed;	// Number of elapsed seconds
+		WORD		BootpFlags;		// BOOTP Flags
+		IP_ADDR		ClientIP;		// Client IP
+		IP_ADDR		YourIP;			// Your IP
+		IP_ADDR		NextServerIP;	// Next Server IP
+		IP_ADDR		RelayAgentIP;	// Relay Agent IP
+		MAC_ADDR	ClientMAC;		// Client MAC Address
+	} BOOTP_HEADER;*/
+	BOOTP_HEADER clientHeader;
+	// MessageType -- WHat can be the options?
+
+
 	/*****************************************************************************
 	  Function:
 		WORD UDPIsGetReady(UDP_SOCKET s)
@@ -109,7 +130,7 @@ void ReceiveInput(UDP_SOCKET listen) {
 	value is less than wDataLen, then the buffer was emptied and no more
 	data is available.
 	***************************************************************************/
-	UDPGetArray((BYTE*)&BOOTPHeader, sizeof(BOOTPHeader));
+	UDPGetArray((BYTE*)&clientHeader, sizeof(clientHeader));
 }
 
 
