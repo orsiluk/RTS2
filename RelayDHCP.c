@@ -3,11 +3,12 @@
 #define __SDCC__
 #include <pic18f97j60.h> //ML
 
-#include "../Include/TCPIPConfig.h"
+#include "Include/TCPIPConfig.h"
 #include "Include/TCPIP_Stack/TCPIP.h"
-#include "DHCPs.c"
-#include "DHCP.c"
-#include "../Include/LCDBlocking.h"
+// #include "TCPIP_Stack/DHCPs.c"
+#include "Include/TCPIP_Stack/DHCP.h"
+#include "Include/TCPIP_Stack/UDP.h"
+#include "Include/LCDBlocking.h"
 
 // DHCP Server at 	192.168.2.2
 // 			c0.a8.02.02
@@ -16,10 +17,11 @@
 // Little endian!
 #define DHCP_SERVER_IP	0x0202A8C0
 
-static 	UDP_SOCKET	ClientSocket;
-static 	UDP_SOCKET 	ServerSocket;
+static 	UDP_SOCKET	CSocket;
+static 	UDP_SOCKET 	SSocket;
 static 	NODE_INFO 	DHCPServer; // You can get the ip of the server by typing DHCPServer.IPAddr.Val
 static BOOL getARP();
+void ReceiveInput(UDP_SOCKET listen);
 BOOL relayEnable = TRUE;
 
 static BOOL getARP() {
@@ -43,20 +45,20 @@ static int Receive() {
 		// Print to LCD ("Socket ERROR!");
 		LCDErase();
 		DisplayString(0 , "Socket ERROR!");
-		break;
+		return 0;
 	} else {
 		// Print to LCD ("Socket success");
 		LCDErase();
-		DisplayString(0, "Socket success")
-		smDHCPRelay++;
+		DisplayString(0, "Socket success");
+		// numDHCPRelay++;
 	}
 
 	// Start listening
 
-	ReceiveInput(ServerSocket);
-	ReceiveInput(ClientSocket);
+	ReceiveInput(SSocket);
+	ReceiveInput(CSocket);
 	UDPDiscard();
-
+	return 1;
 }
 
 void ReceiveInput(UDP_SOCKET listen) {

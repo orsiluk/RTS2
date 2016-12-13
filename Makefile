@@ -19,18 +19,20 @@ SDCC_HEADERS=/usr/local/share/sdcc/include/string.h \
 SDCC_PIC16_HEADERS=/usr/local/share/sdcc/include/pic16/pic18f97j60.h
 
 TCPIP_HEADERS=   Include/TCPIP_Stack/ETH97J60.h \
-   Include/TCPIP_Stack/LCDBlocking.h 
+   Include/TCPIP_Stack/LCDBlocking.h \
+   Include/TCPIPConfig.h \
+   Include/TCPIP_Stack/TCPIP.h \
 
 APP_HEADERS=Include/GenericTypeDefs.h \
    Include/Compiler.h \
    Include/HardwareProfile.h 
 
-dhcp : Objects/dhcp.o $(OBJECTS)
-	$(LD) $(LDFLAGS) Objects/dhcp.o $(OBJECTS)
+RelayDHCP : Objects/RelayDHCP.o $(OBJECTS)
+	$(LD) $(LDFLAGS) Objects/RelayDHCP.o $(OBJECTS)
 
-Objects/dhcp.o : dhcp.c $(SDCC_HEADERS) $(SDCC_PIC16_HEADERS) \
+Objects/RelayDHCP.o : RelayDHCP.c $(SDCC_HEADERS) $(SDCC_PIC16_HEADERS) \
    $(APP_HEADERS) $(TCPIP_HEADERS)
-	$(CC) $(CFLAGS) dhcp.c
+	$(CC) $(CFLAGS) RelayDHCP.c
 
 Objects/LCDBlocking.o : TCPIP_Stack/LCDBlocking.c $(SDCC_HEADERS)  \
    $(SDCC_PIC16_HEADERS) $(APP_HEADERS) $(TCPIP_HEADERS)
