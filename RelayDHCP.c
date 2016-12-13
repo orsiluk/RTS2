@@ -223,26 +223,19 @@ void DiscoveryToS(BOOTP_HEADER *clientHeader) {
 	if (UDPIsPutReady(SSocket) < 300u)
 		return;
 
-	UDPPut(BOOT_REPLY);			// Message Type: 2 (BOOTP Reply)
-	// Reply with the same Hardware Type, Hardware Address Length, Hops, and Transaction ID fields
-	UDPPutArray((BYTE*) & (ClientHeader->HardwareType), 7);
-	UDPPut(0x00);				// Seconds Elapsed: 0 (Not used)
-	UDPPut(0x00);				// Seconds Elapsed: 0 (Not used)
-	UDPPutArray((BYTE*) & (clientHeader->BootpFlags), sizeof(Header->BootpFlags));
-	UDPPut(0x00);				// Your (client) IP Address: 0.0.0.0 (none yet assigned)
-	UDPPut(0x00);				// Your (client) IP Address: 0.0.0.0 (none yet assigned)
-	UDPPut(0x00);				// Your (client) IP Address: 0.0.0.0 (none yet assigned)
-	UDPPut(0x00);				// Your (client) IP Address: 0.0.0.0 (none yet assigned)
-	UDPPutArray((BYTE*)&DHCPNextLease, sizeof(IP_ADDR));	// Lease IP address to give out
-	UDPPut(0x00);				// Next Server IP Address: 0.0.0.0 (not used)
-	UDPPut(0x00);				// Next Server IP Address: 0.0.0.0 (not used)
-	UDPPut(0x00);				// Next Server IP Address: 0.0.0.0 (not used)
-	UDPPut(0x00);				// Next Server IP Address: 0.0.0.0 (not used)
-	UDPPut(0x00);				// Relay Agent IP Address: 0.0.0.0 (not used)
-	UDPPut(0x00);				// Relay Agent IP Address: 0.0.0.0 (not used)
-	UDPPut(0x00);				// Relay Agent IP Address: 0.0.0.0 (not used)
-	UDPPut(0x00);				// Relay Agent IP Address: 0.0.0.0 (not used)
-	UDPPutArray((BYTE*) & (clientHeader->ClientMAC), sizeof(MAC_ADDR));	// Client MAC address: Same as given by client
+	UDPPutArray((BYTE*)&(Header->MessageType), sizeof(Header->MessageType));
+	UDPPutArray((BYTE*)&(Header->HardwareType), sizeof(Header->HardwareType));
+	UDPPutArray((BYTE*)&(Header->HardwareLen), sizeof(Header->HardwareLen));
+	UDPPutArray((BYTE*)&(Header->Hops), sizeof(Header->Hops));
+	UDPPutArray((BYTE*)&(Header->TransactionID), sizeof(Header->TransactionID));
+	UDPPutArray((BYTE*)&(Header->SecondsElapsed), sizeof(Header->SecondsElapsed));
+	UDPPutArray((BYTE*)&(Header->BootpFlags), sizeof(Header->BootpFlags));
+	UDPPutArray((BYTE*)&(Header->ClientIP), sizeof(Header->ClientIP));
+	UDPPutArray((BYTE*)&(Header->YourIP), sizeof(Header->YourIP));
+	UDPPutArray((BYTE*)&(Header->NextServerIP), sizeof(Header->NextServerIP));
+	UDPPutArray((BYTE*)&(AppConfig.MyIPAddr), sizeof(AppConfig.MyIPAddr));
+	UDPPutArray((BYTE*)&(Header->ClientMAC), sizeof(Header->ClientMAC));
+
 	for (i = 0; i < 64 + 128 + (16 - sizeof(MAC_ADDR)); i++)	// Remaining 10 bytes of client hardware address, server host name: Null string (not used)
 		UDPPut(0x00);									// Boot filename: Null string (not used)
 	UDPPut(0x63);				// Magic Cookie: 0x63538263
@@ -250,23 +243,10 @@ void DiscoveryToS(BOOTP_HEADER *clientHeader) {
 	UDPPut(0x53);				// Magic Cookie: 0x63538263
 	UDPPut(0x63);				// Magic Cookie: 0x63538263
 
-	// Options: DHCP Offer
+	// Message type = DISCOVERY
 	UDPPut(DHCP_MESSAGE_TYPE);
 	UDPPut(1);
-	UDPPut(DHCP_OFFER_MESSAGE);
-
-	// Option: Subnet Mask
-	UDPPut(DHCP_SUBNET_MASK);
-	UDPPut(sizeof(IP_ADDR));
-	UDPPutArray((BYTE*)&AppConfig.MyMask, sizeof(IP_ADDR));
-
-	// Option: Lease duration
-	UDPPut(DHCP_IP_LEASE_TIME);
-	UDPPut(4);
-	UDPPut((DHCP_LEASE_DURATION >> 24) & 0xFF);
-	UDPPut((DHCP_LEASE_DURATION >> 16) & 0xFF);
-	UDPPut((DHCP_LEASE_DURATION >> 8) & 0xFF);
-	UDPPut((DHCP_LEASE_DURATION) & 0xFF);
+	UDPPut(DHCP_DISCOVER_MESSAGE);
 
 	// Option: Server identifier
 	UDPPut(DHCP_SERVER_IDENTIFIER);
