@@ -78,7 +78,13 @@ void ReceiveInput(UDP_SOCKET listen) {
 		MAC_ADDR	ClientMAC;		// Client MAC Address
 	} BOOTP_HEADER;*/
 	BOOTP_HEADER clientHeader;
-	// MessageType -- WHat can be the options?
+	// MessageType
+
+//		70  #define DHCP_DISCOVER_MESSAGE           (1u)	// DCHP Discover Message
+//   	71  #define DHCP_OFFER_MESSAGE              (2u)	// DHCP Offer Message
+//   	72: #define DHCP_REQUEST_MESSAGE            (3u)	// DHCP Request message
+//   	73  #define DHCP_DECLINE_MESSAGE            (4u)	// DHCP Decline Message
+//   	74  #define DHCP_ACK_MESSAGE                (5u)	// DHCP ACK Message
 
 
 	/*****************************************************************************
@@ -102,7 +108,7 @@ void ReceiveInput(UDP_SOCKET listen) {
 	  ***************************************************************************/
 
 	// Check to see if a valid DHCP packet has arrived
-	if (UDPIsGetReady(socket) < 241u)
+	if (UDPIsGetReady(listen) < 241u)
 		return;
 
 	/*****************************************************************************
