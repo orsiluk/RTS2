@@ -268,3 +268,57 @@ void DiscoveryToS(BOOTP_HEADER *clientHeader) {
 	// Transmit the packet
 	UDPFlush();
 }
+
+void ReqToS(BOOTP_HEADER *clientHeader) {
+	BYTE i;
+
+	// Set the correct socket to active and ensure that
+	// enough space is available to generate the DHCP response
+	if (UDPIsPutReady(SSocket) < 300u)
+		return;
+
+	UDPPutArray((BYTE*)&(Header->MessageType), sizeof(Header->MessageType));
+	UDPPutArray((BYTE*)&(Header->HardwareType), sizeof(Header->HardwareType));
+	UDPPutArray((BYTE*)&(Header->HardwareLen), sizeof(Header->HardwareLen));
+	UDPPutArray((BYTE*)&(Header->Hops), sizeof(Header->Hops));
+	UDPPutArray((BYTE*)&(Header->TransactionID), sizeof(Header->TransactionID));
+	UDPPutArray((BYTE*)&(Header->SecondsElapsed), sizeof(Header->SecondsElapsed));
+	UDPPutArray((BYTE*)&(Header->BootpFlags), sizeof(Header->BootpFlags));
+	UDPPutArray((BYTE*)&(Header->ClientIP), sizeof(Header->ClientIP));
+	UDPPutArray((BYTE*)&(Header->YourIP), sizeof(Header->YourIP));
+	UDPPutArray((BYTE*)&(Header->NextServerIP), sizeof(Header->NextServerIP));
+	UDPPutArray((BYTE*)&(AppConfig.MyIPAddr), sizeof(AppConfig.MyIPAddr));
+	UDPPutArray((BYTE*)&(Header->ClientMAC), sizeof(Header->ClientMAC));
+
+	for (i = 0; i < 64 + 128 + (16 - sizeof(MAC_ADDR)); i++)	// Remaining 10 bytes of client hardware address, server host name: Null string (not used)
+		UDPPut(0x00);									// Boot filename: Null string (not used)
+	UDPPut(0x63);				// Magic Cookie: 0x63538263
+	UDPPut(0x82);				// Magic Cookie: 0x63538263
+	UDPPut(0x53);				// Magic Cookie: 0x63538263
+	UDPPut(0x63);				// Magic Cookie: 0x63538263
+
+	// Message type = REQUEST
+	UDPPut(DHCP_MESSAGE_TYPE);
+	UDPPut(1);
+	UDPPut(DHCP_REQUEST_MESSAGE);
+
+	// Option: Server identifier
+	UDPPut(DHCP_SERVER_IDENTIFIER);
+	UDPPut(sizeof(IP_ADDR));
+	UDPPutArray((BYTE*)&AppConfig.MyIPAddr, sizeof(IP_ADDR));
+
+	// Option: Router/Gateway address
+	UDPPut(DHCP_ROUTER);
+	UDPPut(sizeof(IP_ADDR));
+	UDPPutArray((BYTE*)&AppConfig.MyIPAddr, sizeof(IP_ADDR));
+
+	// No more options, mark ending
+	UDPPut(DHCP_END_OPTION);
+
+	// Add zero padding to ensure compatibility with old BOOTP relays that discard small packets (<300 UDP octets)
+	while (UDPTxCount < 300u)
+		UDPPut(0);
+
+	// Transmit the packet
+	UDPFlush();
+}
