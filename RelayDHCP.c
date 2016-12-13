@@ -175,7 +175,7 @@ void ReceiveInput(UDP_SOCKET listen) {
 			{
 			case DHCP_DISCOVER_MESSAGE:
 				DisplayString("DISCOVER", "");
-				DiscoveryToS(&clientHeader);
+				MessageToServer(&clientHeader,DHCP_DISCOVER_MESSAGE);
 				break;
 			case DHCP_OFFER_MESSAGE:
 				DisplayString("OFFER", "");
@@ -183,7 +183,7 @@ void ReceiveInput(UDP_SOCKET listen) {
 				break;
 			case DHCP_REQUEST_MESSAGE:
 				DisplayString("REQUEST", "");
-				ReqToS(&clientHeader);
+				MessageToServer(&clientHeader,DHCP_REQUEST_MESSAGE);
 				break;
 			case DHCP_DECLINE_MESSAGE:
 				DrespondString("DECLINE", "");
@@ -213,6 +213,63 @@ void ReceiveInput(UDP_SOCKET listen) {
 			UDPGet(&i);
 		}
 	}
+}
+
+void MessageToServer(BOOTP_HEADER *clientHeader, BYTE messageType) {
+	BYTE i;
+
+	if(messageType != DHCP_DISCOVER_MESSAGE || messageType != DHCP_REQUEST_MESSAGE)
+		return;	//If messageType is not Discovery or Request, something's up..
+
+	// Set the correct socket to active and ensure that
+	// enough space is available to generate the DHCP response
+	if (UDPIsPutReady(SSocket) < 300u)
+		return;
+
+	UDPPutArray((BYTE*)&(Header->MessageType), sizeof(Header->MessageType));
+	UDPPutArray((BYTE*)&(Header->HardwareType), sizeof(Header->HardwareType));
+	UDPPutArray((BYTE*)&(Header->HardwareLen), sizeof(Header->HardwareLen));
+	UDPPutArray((BYTE*)&(Header->Hops), sizeof(Header->Hops));
+	UDPPutArray((BYTE*)&(Header->TransactionID), sizeof(Header->TransactionID));
+	UDPPutArray((BYTE*)&(Header->SecondsElapsed), sizeof(Header->SecondsElapsed));
+	UDPPutArray((BYTE*)&(Header->BootpFlags), sizeof(Header->BootpFlags));
+	UDPPutArray((BYTE*)&(Header->ClientIP), sizeof(Header->ClientIP));
+	UDPPutArray((BYTE*)&(Header->YourIP), sizeof(Header->YourIP));
+	UDPPutArray((BYTE*)&(Header->NextServerIP), sizeof(Header->NextServerIP));
+	UDPPutArray((BYTE*)&(AppConfig.MyIPAddr), sizeof(AppConfig.MyIPAddr));
+	UDPPutArray((BYTE*)&(Header->ClientMAC), sizeof(Header->ClientMAC));
+
+	for (i = 0; i < 64 + 128 + (16 - sizeof(MAC_ADDR)); i++)	// Remaining 10 bytes of client hardware address, server host name: Null string (not used)
+		UDPPut(0x00);									// Boot filename: Null string (not used)
+	UDPPut(0x63);				// Magic Cookie: 0x63538263
+	UDPPut(0x82);				// Magic Cookie: 0x63538263
+	UDPPut(0x53);				// Magic Cookie: 0x63538263
+	UDPPut(0x63);				// Magic Cookie: 0x63538263
+
+	// Set the message type (can be DISCOVER or REQUEST)
+	UDPPut(DHCP_MESSAGE_TYPE);
+	UDPPut(1);
+	UDPPut(messageType);
+
+	// Option: Server identifier
+	UDPPut(DHCP_SERVER_IDENTIFIER);
+	UDPPut(sizeof(IP_ADDR));
+	UDPPutArray((BYTE*)&AppConfig.MyIPAddr, sizeof(IP_ADDR));
+
+	// Option: Router/Gateway address
+	UDPPut(DHCP_ROUTER);
+	UDPPut(sizeof(IP_ADDR));
+	UDPPutArray((BYTE*)&AppConfig.MyIPAddr, sizeof(IP_ADDR));
+
+	// No more options, mark ending
+	UDPPut(DHCP_END_OPTION);
+
+	// Add zero padding to ensure compatibility with old BOOTP relays that discard small packets (<300 UDP octets)
+	while (UDPTxCount < 300u)
+		UDPPut(0);
+
+	// Transmit the packet
+	UDPFlush();
 }
 
 void DiscoveryToS(BOOTP_HEADER *clientHeader) {
@@ -276,6 +333,38 @@ void ReqToS(BOOTP_HEADER *clientHeader) {
 	// enough space is available to generate the DHCP response
 	if (UDPIsPutReady(SSocket) < 300u)
 		return;
+
+	// Search through all remaining options and look for the Requested IP address field
+	// Obtain options
+	while(UDPIsGetReady(MySocket))
+	{
+		BYTE Option, Len;
+		DWORD dw;
+
+		// Get option type
+		if(!UDPGet(&Option))
+			break;
+		if(Option == DHCP_END_OPTION)
+			break;
+
+		// Get option length
+		UDPGet(&Len);
+
+		// Process option
+		if((Option == DHCP_PARAM_REQUEST_IP_ADDRESS) && (Len == 4u))
+		{
+			// Get the requested IP address and see if it is the one we have on offer.  If not, we should send back a NAK, but since there could be some other DHCP server offering this address, we'll just silently ignore this request.
+			UDPGetArray((BYTE*)&dw, 4);
+			//Set an appropriate flag
+			break;
+		}
+
+		// Remove the unprocessed bytes that we don't care about
+		while(Len--)
+		{
+			UDPGet(&i);
+		}
+	}
 
 	UDPPutArray((BYTE*)&(Header->MessageType), sizeof(Header->MessageType));
 	UDPPutArray((BYTE*)&(Header->HardwareType), sizeof(Header->HardwareType));
