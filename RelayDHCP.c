@@ -20,8 +20,11 @@
 static 	UDP_SOCKET	CSocket;
 static 	UDP_SOCKET 	SSocket;
 static 	NODE_INFO 	DHCPServer; // You can get the ip of the server by typing DHCPServer.IPAddr.Val
-static BOOL getARP();
+static  BOOL getARP();
+static  void RespondToServer(BOOTP_HEADER *Header, int type);
+static  void RespondToClient(BOOTP_HEADER *Header, int type, int useBroadcast);
 void ReceiveInput(UDP_SOCKET listen);
+
 BOOL relayEnable = TRUE;
 
 static BOOL getARP() {
@@ -79,14 +82,15 @@ void ReceiveInput(UDP_SOCKET listen) {
 		IP_ADDR		RelayAgentIP;	// Relay Agent IP
 		MAC_ADDR	ClientMAC;		// Client MAC Address
 	} BOOTP_HEADER;*/
-	BOOTP_HEADER clientHeader;
-	// MessageType
 
-//		70  #define DHCP_DISCOVER_MESSAGE           (1u)	// DCHP Discover Message
-//   	71  #define DHCP_OFFER_MESSAGE              (2u)	// DHCP Offer Message
-//   	72: #define DHCP_REQUEST_MESSAGE            (3u)	// DHCP Request message
-//   	73  #define DHCP_DECLINE_MESSAGE            (4u)	// DHCP Decline Message
-//   	74  #define DHCP_ACK_MESSAGE                (5u)	// DHCP ACK Message
+	BOOTP_HEADER clientHeader;
+	BYTE Option, Len;
+
+//		  #define DHCP_DISCOVER_MESSAGE           (1u)	// DCHP Discover Message
+//   	  #define DHCP_OFFER_MESSAGE              (2u)	// DHCP Offer Message
+//   	  #define DHCP_REQUEST_MESSAGE            (3u)	// DHCP Request message
+//   	  #define DHCP_DECLINE_MESSAGE            (4u)	// DHCP Decline Message
+//   	  #define DHCP_ACK_MESSAGE                (5u)	// DHCP ACK Message
 
 
 	/*****************************************************************************
@@ -139,7 +143,69 @@ void ReceiveInput(UDP_SOCKET listen) {
 	data is available.
 	***************************************************************************/
 	UDPGetArray((BYTE*)&clientHeader, sizeof(clientHeader));
-}
+	if (clientHeader.HardwareType != 1u)
+		return;
+	if (clientHeader.HardwareLen != 6u)
+		return;
+
+	UDPGetArray((BYTE*)&dw, sizeof(DWORD));
+	if (dw != 0x63538263ul)
+		break;
+
+	while (1)
+	{
+		// Get option type
+		if (!UDPGet(&Option))
+			break;
+		if (Option == DHCP_END_OPTION)
+			break;
+
+		// Get option length
+		UDPGet(&Len);
+
+		// Process option
+		switch (Option)
+		{
+		case DHCP_MESSAGE_TYPE:
+			UDPGet(&i);
+			switch (i)
+			{
+			case DHCP_DISCOVER_MESSAGE:
+				DisplayString("DISCOVER", "");
+				RespondToServer(&BOOTPHeader, i);
+				break;
+			case DHCP_OFFER_MESSAGE:
+				DisplayString("OFFER", "");
+				RespondToClient(&BOOTPHeader, i, 1);
+				break;
+			case DHCP_REQUEST_MESSAGE:
+				DisplayString("REQUEST", "");
+				RespondToServer(&BOOTPHeader, i);
+				break;
+			case DHCP_DECLINE_MESSAGE:
+				DrespondString("DECLINE", "");
+				break;
+			case DHCP_ACK_MESSAGE:
+				DisplayString("ACK", "");
+				RespondToClient(&BOOTPHeader, i, 0);
+				break;
+			// case DHCP_RELEASE_MESSAGE:
+			// 	DisplayString("RELEASE", "");
+			// 	break;
+			default:
+				DisplayString("DEFAULT", "");
+				break;
+
+			}
+			break;
+		case DHCP_PARAM_REQUEST_IP_ADDRESS:
+			DisplayString("IP Requested", "Not handled");
+		case DHCP_END_OPTION:
+			UDPDiscard();
+			return;
+		}
+
+	}
 
 
 

@@ -1,7 +1,7 @@
 ;--------------------------------------------------------
 ; File Created by SDCC : free open source ANSI-C Compiler
 ; Version 2.9.4 #5595 (Nov 23 2016) (Mac OS X ppc)
-; This file was generated Tue Dec 13 15:03:42 2016
+; This file was generated Tue Dec 13 15:13:26 2016
 ;--------------------------------------------------------
 ; PIC16 port for the Microchip 16-bit core micros
 ;--------------------------------------------------------
@@ -496,7 +496,7 @@ _ReceiveInput_clientHeader_1_1	res	34
 ; ; Starting pCode block
 S_RelayDHCP__ReceiveInput	code
 _ReceiveInput:
-;	.line	63; RelayDHCP.c	void ReceiveInput(UDP_SOCKET listen) {
+;	.line	64; RelayDHCP.c	void ReceiveInput(UDP_SOCKET listen) {
 	MOVFF	FSR2L, POSTDEC1
 	MOVFF	FSR1L, FSR2L
 	MOVFF	r0x00, POSTDEC1
@@ -504,7 +504,7 @@ _ReceiveInput:
 	MOVFF	r0x02, POSTDEC1
 	MOVLW	0x02
 	MOVFF	PLUSW2, r0x00
-;	.line	112; RelayDHCP.c	if (UDPIsGetReady(listen) < 241u)
+;	.line	113; RelayDHCP.c	if (UDPIsGetReady(listen) < 241u)
 	MOVF	r0x00, W
 	MOVWF	POSTDEC1
 	CALL	_UDPIsGetReady
@@ -517,9 +517,9 @@ _ReceiveInput:
 	MOVLW	0xf1
 	SUBWF	r0x00, W
 _00133_DS_:
-;	.line	113; RelayDHCP.c	return;
+;	.line	114; RelayDHCP.c	return;
 	BNC	_00130_DS_
-;	.line	140; RelayDHCP.c	UDPGetArray((BYTE*)&clientHeader, sizeof(clientHeader));
+;	.line	141; RelayDHCP.c	UDPGetArray((BYTE*)&clientHeader, sizeof(clientHeader));
 	MOVLW	HIGH(_ReceiveInput_clientHeader_1_1)
 	MOVWF	r0x01
 	MOVLW	LOW(_ReceiveInput_clientHeader_1_1)
@@ -549,20 +549,20 @@ _00130_DS_:
 ; ; Starting pCode block
 S_RelayDHCP__Receive	code
 _Receive:
-;	.line	33; RelayDHCP.c	static int Receive() {
+;	.line	34; RelayDHCP.c	static int Receive() {
 	MOVFF	FSR2L, POSTDEC1
 	MOVFF	FSR1L, FSR2L
 	MOVFF	r0x00, POSTDEC1
 	MOVFF	r0x01, POSTDEC1
 	BANKSEL	_relayEnable
-;	.line	35; RelayDHCP.c	if (relayEnable == FALSE) return 0;
+;	.line	36; RelayDHCP.c	if (relayEnable == FALSE) return 0;
 	MOVF	_relayEnable, W, B
 	BNZ	_00111_DS_
 	CLRF	PRODL
 	CLRF	WREG
 	BRA	_00116_DS_
 _00111_DS_:
-;	.line	40; RelayDHCP.c	CSocket = UDPOpen(DHCP_SERVER_PORT, NULL, DHCP_CLIENT_PORT);
+;	.line	41; RelayDHCP.c	CSocket = UDPOpen(DHCP_SERVER_PORT, NULL, DHCP_CLIENT_PORT);
 	MOVLW	0x00
 	MOVWF	POSTDEC1
 	MOVLW	0x44
@@ -582,7 +582,7 @@ _00111_DS_:
 	MOVWF	_CSocket, B
 	MOVLW	0x07
 	ADDWF	FSR1L, F
-;	.line	41; RelayDHCP.c	SSocket = UDPOpen(DHCP_CLIENT_PORT, NULL, DHCP_SERVER_PORT);
+;	.line	42; RelayDHCP.c	SSocket = UDPOpen(DHCP_CLIENT_PORT, NULL, DHCP_SERVER_PORT);
 	MOVLW	0x00
 	MOVWF	POSTDEC1
 	MOVLW	0x43
@@ -602,7 +602,7 @@ _00111_DS_:
 	MOVWF	_SSocket, B
 	MOVLW	0x07
 	ADDWF	FSR1L, F
-;	.line	43; RelayDHCP.c	if (CSocket == INVALID_UDP_SOCKET || SSocket == INVALID_UDP_SOCKET) {
+;	.line	44; RelayDHCP.c	if (CSocket == INVALID_UDP_SOCKET || SSocket == INVALID_UDP_SOCKET) {
 	MOVFF	_CSocket, r0x00
 	CLRF	r0x01
 	MOVF	r0x00, W
@@ -621,9 +621,9 @@ _00121_DS_:
 _00122_DS_:
 	BRA	_00113_DS_
 _00112_DS_:
-;	.line	45; RelayDHCP.c	LCDErase();
+;	.line	46; RelayDHCP.c	LCDErase();
 	CALL	_LCDErase
-;	.line	46; RelayDHCP.c	DisplayString(0 , "Socket ERROR!");
+;	.line	47; RelayDHCP.c	DisplayString(0 , "Socket ERROR!");
 	MOVLW	UPPER(__str_0)
 	MOVWF	POSTDEC1
 	MOVLW	HIGH(__str_0)
@@ -635,14 +635,14 @@ _00112_DS_:
 	CALL	_DisplayString
 	MOVLW	0x04
 	ADDWF	FSR1L, F
-;	.line	47; RelayDHCP.c	return 0;
+;	.line	48; RelayDHCP.c	return 0;
 	CLRF	PRODL
 	CLRF	WREG
 	BRA	_00116_DS_
 _00113_DS_:
-;	.line	50; RelayDHCP.c	LCDErase();
+;	.line	51; RelayDHCP.c	LCDErase();
 	CALL	_LCDErase
-;	.line	51; RelayDHCP.c	DisplayString(0, "Socket success");
+;	.line	52; RelayDHCP.c	DisplayString(0, "Socket success");
 	MOVLW	UPPER(__str_1)
 	MOVWF	POSTDEC1
 	MOVLW	HIGH(__str_1)
@@ -655,20 +655,20 @@ _00113_DS_:
 	MOVLW	0x04
 	ADDWF	FSR1L, F
 	BANKSEL	_SSocket
-;	.line	57; RelayDHCP.c	ReceiveInput(SSocket);
+;	.line	58; RelayDHCP.c	ReceiveInput(SSocket);
 	MOVF	_SSocket, W, B
 	MOVWF	POSTDEC1
 	CALL	_ReceiveInput
 	INCF	FSR1L, F
 	BANKSEL	_CSocket
-;	.line	58; RelayDHCP.c	ReceiveInput(CSocket);
+;	.line	59; RelayDHCP.c	ReceiveInput(CSocket);
 	MOVF	_CSocket, W, B
 	MOVWF	POSTDEC1
 	CALL	_ReceiveInput
 	INCF	FSR1L, F
-;	.line	59; RelayDHCP.c	UDPDiscard();
+;	.line	60; RelayDHCP.c	UDPDiscard();
 	CALL	_UDPDiscard
-;	.line	60; RelayDHCP.c	return 1;
+;	.line	61; RelayDHCP.c	return 1;
 	CLRF	PRODL
 	MOVLW	0x01
 _00116_DS_:
@@ -680,7 +680,7 @@ _00116_DS_:
 ; ; Starting pCode block
 S_RelayDHCP__getARP	code
 _getARP:
-;	.line	26; RelayDHCP.c	static BOOL getARP() {
+;	.line	27; RelayDHCP.c	static BOOL getARP() {
 	MOVFF	FSR2L, POSTDEC1
 	MOVFF	FSR1L, FSR2L
 	MOVFF	r0x00, POSTDEC1
@@ -689,7 +689,7 @@ _getARP:
 	MOVFF	r0x03, POSTDEC1
 	MOVFF	r0x04, POSTDEC1
 	MOVFF	r0x05, POSTDEC1
-;	.line	28; RelayDHCP.c	ARPResolve(&DHCPServer.IPAddr);
+;	.line	29; RelayDHCP.c	ARPResolve(&DHCPServer.IPAddr);
 	MOVLW	HIGH(_DHCPServer)
 	MOVWF	r0x01
 	MOVLW	LOW(_DHCPServer)
@@ -705,7 +705,7 @@ _getARP:
 	CALL	_ARPResolve
 	MOVLW	0x03
 	ADDWF	FSR1L, F
-;	.line	30; RelayDHCP.c	return ARPIsResolved(&DHCPServer.IPAddr, &DHCPServer.MACAddr);
+;	.line	31; RelayDHCP.c	return ARPIsResolved(&DHCPServer.IPAddr, &DHCPServer.MACAddr);
 	MOVLW	HIGH(_DHCPServer)
 	MOVWF	r0x01
 	MOVLW	LOW(_DHCPServer)
