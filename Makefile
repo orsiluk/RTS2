@@ -8,7 +8,9 @@ LDFLAGS= -mpic16 -p18f97j60 -L/usr/local/share/sdcc/lib/pic16 \
 AR = ar
 RM = rm
 
-OBJECTS= Objects/LCDBlocking.o
+OBJECTS= Objects/LCDBlocking.o \
+		 Objects/UDP.o \
+		 Object/RelayDHCP.o
 
 SDCC_HEADERS=/usr/local/share/sdcc/include/string.h \
    /usr/local/share/sdcc/include/stdlib.h \
@@ -22,17 +24,25 @@ TCPIP_HEADERS=   Include/TCPIP_Stack/ETH97J60.h \
    Include/TCPIP_Stack/LCDBlocking.h \
    Include/TCPIPConfig.h \
    Include/TCPIP_Stack/TCPIP.h \
+   Include/TCPIP_Stack/DHCP.h \
+   Include/TCPIP_Stack/UDP.h
 
 APP_HEADERS=Include/GenericTypeDefs.h \
    Include/Compiler.h \
    Include/HardwareProfile.h 
 
-RelayDHCP : Objects/RelayDHCP.o $(OBJECTS)
+RelayDHCP : RelayDHCP.o $(OBJECTS)
 	$(LD) $(LDFLAGS) Objects/RelayDHCP.o $(OBJECTS)
 
 Objects/RelayDHCP.o : RelayDHCP.c $(SDCC_HEADERS) $(SDCC_PIC16_HEADERS) \
    $(APP_HEADERS) $(TCPIP_HEADERS)
-	$(CC) $(CFLAGS) RelayDHCP.c
+	$(CC) $(CFLAGS) "Objects/RelayDHCP.o" \
+              -L/usr/local/lib/pic16  RelayDHCP.c
+
+Objects/UDP.o : TCPIP_Stack/UDP.c $(SDCC_HEADERS) $(SDCC_PIC16_HEADERS) \
+   $(APP_HEADERS) $(TCPIP_HEADERS)
+	$(CC) $(CFLAGS) "Objects/UDP.o" \
+              -L/usr/local/lib/pic16  TCPIP_Stack/UDP.c
 
 Objects/LCDBlocking.o : TCPIP_Stack/LCDBlocking.c $(SDCC_HEADERS)  \
    $(SDCC_PIC16_HEADERS) $(APP_HEADERS) $(TCPIP_HEADERS)

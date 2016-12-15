@@ -16,16 +16,17 @@
 // 			c0.a8.61.03
 // Little endian!
 #define DHCP_SERVER_IP	0x0202A8C0
+#define DHCP_LEASE_DURATION	60ul
 
 static 	UDP_SOCKET	CSocket;
 static 	UDP_SOCKET 	SSocket;
 static 	NODE_INFO 	DHCPServer; // You can get the ip of the server by typing DHCPServer.IPAddr.Val
 static  BOOL getARP();
 void ReceiveInput(UDP_SOCKET listen);
-void DiscoveryToS(&BOOTPHeader);
-void OfferToC(&BOOTPHeader);
-void ReqToS(&BOOTPHeader);
-void AccToC(&BOOTPHeader);
+void DiscoveryToS(BOOTP_HEADER *Header);
+void OfferToC(BOOTP_HEADER *Header);
+void ReqToS(BOOTP_HEADER *Header);
+void AccToC(BOOTP_HEADER *Header);
 
 BOOL relayEnable = TRUE;
 
@@ -86,7 +87,8 @@ void ReceiveInput(UDP_SOCKET listen) {
 	} BOOTP_HEADER;*/
 
 	BOOTP_HEADER clientHeader;
-	BYTE Option, Len;
+	BYTE Option, Len, i;
+	DWORD dw;
 
 //		  #define DHCP_DISCOVER_MESSAGE           (1u)	// DCHP Discover Message
 //   	  #define DHCP_OFFER_MESSAGE              (2u)	// DHCP Offer Message
@@ -153,7 +155,7 @@ void ReceiveInput(UDP_SOCKET listen) {
 
 	UDPGetArray((BYTE*)&dw, sizeof(DWORD));
 	if (dw != 0x63538263ul)
-		break;
+		return;
 
 	while (1)
 	{
@@ -174,35 +176,35 @@ void ReceiveInput(UDP_SOCKET listen) {
 			switch (i)
 			{
 			case DHCP_DISCOVER_MESSAGE:
-				DisplayString("DISCOVER", "");
+				DisplayString(0,"DISCOVER");
 				DiscoveryToS(&clientHeader);
 				break;
 			case DHCP_OFFER_MESSAGE:
-				DisplayString("OFFER", "");
+				DisplayString(0,"OFFER");
 				OfferToC(&clientHeader);
 				break;
 			case DHCP_REQUEST_MESSAGE:
-				DisplayString("REQUEST", "");
+				DisplayString(0,"REQUEST");
 				ReqToS(&clientHeader);
 				break;
 			case DHCP_DECLINE_MESSAGE:
-				DisplayString("DECLINE", "");
+				DisplayString(0,"DECLINE");
 				break;
 			case DHCP_ACK_MESSAGE:
-				DisplayString("ACK", "");
+				DisplayString(0,"ACK");
 				AccToC(&clientHeader);
 				break;
 			// case DHCP_RELEASE_MESSAGE:
 			// 	DisplayString("RELEASE", "");
 			// 	break;
 			default:
-				DisplayString("DEFAULT", "");
+				DisplayString(0,"DEFAULT");
 				break;
 
 			}
 			break;
 		case DHCP_PARAM_REQUEST_IP_ADDRESS:
-			DisplayString("IP Requested", "Not handled");
+			//DisplayString("IP Requested", "Not handled");
 		case DHCP_END_OPTION:
 			UDPDiscard();
 			return;
@@ -215,7 +217,7 @@ void ReceiveInput(UDP_SOCKET listen) {
 	}
 }
 
-void MessageToServer(BOOTP_HEADER *clientHeader, BYTE messageType) {
+void MessageToServer(BOOTP_HEADER *Header, BYTE messageType) {
 	BYTE i;
 
 	if(messageType != DHCP_DISCOVER_MESSAGE || messageType != DHCP_REQUEST_MESSAGE)
@@ -272,10 +274,11 @@ void MessageToServer(BOOTP_HEADER *clientHeader, BYTE messageType) {
 	UDPFlush();
 }
 
-void OfferToC(BOOTP_HEADER &clientHeader)
+void OfferToC(BOOTP_HEADER *Header)
 {
-	BYTE i;
+	BYTE i,a;
 	DWORD RequestedIP = 0;
+	UDP_SOCKET_INFO* p;
 
 	// Set the correct socket to active and ensure that
 	// enough space is available to generate the DHCP response
@@ -288,7 +291,7 @@ void OfferToC(BOOTP_HEADER &clientHeader)
 	for(a = 0; a < 6; a++){
 		p->remoteNode.MACAddr.v[a] = DHCPServer.MACAddr.v[a];
 	}
-	UDPIsPutReady(ServerSocket);
+	UDPIsPutReady(SSocket);
 	//---------------
 
 	//Send via broadcast
@@ -353,10 +356,11 @@ void OfferToC(BOOTP_HEADER &clientHeader)
 	UDPFlush();
 }
 
-void AckToC(BOOTP_HEADER &clientHeader)
+void AckToC(BOOTP_HEADER *Header)
 {
-	BYTE i;
+	BYTE i,a;
 	DWORD RequestedIP = 0;
+	UDP_SOCKET_INFO *p;
 
 	// Set the correct socket to active and ensure that
 	// enough space is available to generate the DHCP response
@@ -369,7 +373,7 @@ void AckToC(BOOTP_HEADER &clientHeader)
 	for(a = 0; a < 6; a++){
 		p->remoteNode.MACAddr.v[a] = DHCPServer.MACAddr.v[a];
 	}
-	UDPIsPutReady(ServerSocket);
+	UDPIsPutReady(SSocket);
 	//---------------
 
 	//Send via unicast
@@ -434,7 +438,7 @@ void AckToC(BOOTP_HEADER &clientHeader)
 	UDPFlush();
 }
 
-void DiscoveryToS(BOOTP_HEADER *clientHeader) {
+void DiscoveryToS(BOOTP_HEADER *Header) {
 	BYTE i;
 
 	// Set the correct socket to active and ensure that
@@ -488,9 +492,10 @@ void DiscoveryToS(BOOTP_HEADER *clientHeader) {
 	UDPFlush();
 }
 
-void ReqToS(BOOTP_HEADER *clientHeader) {
-	BYTE i;
+void ReqToS(BOOTP_HEADER *Header) {
+	BYTE i,a;
 	DWORD RequestedIP = 0;
+	UDP_SOCKET_INFO *p;
 
 	// Set the correct socket to active and ensure that
 	// enough space is available to generate the DHCP response
@@ -533,7 +538,7 @@ void ReqToS(BOOTP_HEADER *clientHeader) {
 	for(a = 0; a < 6; a++){
 		p->remoteNode.MACAddr.v[a] = DHCPServer.MACAddr.v[a];
 	}
-	UDPIsPutReady(ServerSocket);
+	UDPIsPutReady(SSocket);
 	//---------------
 
 
