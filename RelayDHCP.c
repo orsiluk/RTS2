@@ -175,7 +175,7 @@ void ReceiveInput(UDP_SOCKET listen) {
 			{
 			case DHCP_DISCOVER_MESSAGE:
 				DisplayString("DISCOVER", "");
-				MessageToServer(&clientHeader,DHCP_DISCOVER_MESSAGE);
+				DiscoveryToS(&clientHeader);
 				break;
 			case DHCP_OFFER_MESSAGE:
 				DisplayString("OFFER", "");
@@ -183,10 +183,10 @@ void ReceiveInput(UDP_SOCKET listen) {
 				break;
 			case DHCP_REQUEST_MESSAGE:
 				DisplayString("REQUEST", "");
-				MessageToServer(&clientHeader,DHCP_REQUEST_MESSAGE);
+				ReqToS(&clientHeader);
 				break;
 			case DHCP_DECLINE_MESSAGE:
-				DrespondString("DECLINE", "");
+				DisplayString("DECLINE", "");
 				break;
 			case DHCP_ACK_MESSAGE:
 				DisplayString("ACK", "");
@@ -318,6 +318,87 @@ void OfferToC(BOOTP_HEADER &clientHeader)
 	UDPPut(DHCP_MESSAGE_TYPE);
 	UDPPut(DHCP_MESSAGE_TYPE_LEN);
 	UDPPut(DHCP_OFFER_MESSAGE);
+
+	// Subnet mask
+	UDPPut(DHCP_SUBNET_MASK);
+	UDPPut(sizeof(IP_ADDR));
+	UDPPutArray((BYTE*)&AppConfig.MyMask, sizeof(IP_ADDR));
+
+	// Option: Router/Gateway address
+	UDPPut(DHCP_ROUTER);		
+	UDPPut(sizeof(IP_ADDR));
+	UDPPutArray((BYTE*)&AppConfig.MyIPAddr, sizeof(IP_ADDR));
+
+	// Option: Lease duration
+	UDPPut(DHCP_IP_LEASE_TIME);
+	UDPPut(4);
+	UDPPut((DHCP_LEASE_DURATION>>24) & 0xFF);
+	UDPPut((DHCP_LEASE_DURATION>>16) & 0xFF);
+	UDPPut((DHCP_LEASE_DURATION>>8) & 0xFF);
+	UDPPut((DHCP_LEASE_DURATION) & 0xFF);
+
+	// Option: Server identifier
+	UDPPut(DHCP_SERVER_IDENTIFIER);	
+	UDPPut(sizeof(IP_ADDR));
+	UDPPutArray((BYTE*)&(Header->NextServerIP), sizeof(Header->NextServerIP));
+
+	// No more options, mark ending
+	UDPPut(DHCP_END_OPTION);
+
+	// Add zero padding to ensure compatibility with old BOOTP relays that discard small packets (<300 UDP octets)
+	while (UDPTxCount < 300u)
+		UDPPut(0);
+
+	// Transmit the packet
+	UDPFlush();
+}
+
+void AckToC(BOOTP_HEADER &clientHeader)
+{
+	BYTE i;
+	DWORD RequestedIP = 0;
+
+	// Set the correct socket to active and ensure that
+	// enough space is available to generate the DHCP response
+	if (UDPIsPutReady(CSocket) < 300u)
+		return;
+
+	//REMOVE THIS???
+	p = &UDPSocketInfo[activeUDPSocket];
+	p->remoteNode.IPAddr.Val = DHCPServer.IPAddr.Val;
+	for(a = 0; a < 6; a++){
+		p->remoteNode.MACAddr.v[a] = DHCPServer.MACAddr.v[a];
+	}
+	UDPIsPutReady(ServerSocket);
+	//---------------
+
+	//Send via unicast
+	Header->BootpFlags = 0x0000;
+
+	UDPPutArray((BYTE*)&(Header->MessageType), sizeof(Header->MessageType));
+	UDPPutArray((BYTE*)&(Header->HardwareType), sizeof(Header->HardwareType));
+	UDPPutArray((BYTE*)&(Header->HardwareLen), sizeof(Header->HardwareLen));
+	UDPPutArray((BYTE*)&(Header->Hops), sizeof(Header->Hops));
+	UDPPutArray((BYTE*)&(Header->TransactionID), sizeof(Header->TransactionID));
+	UDPPutArray((BYTE*)&(Header->SecondsElapsed), sizeof(Header->SecondsElapsed));
+	UDPPutArray((BYTE*)&(Header->BootpFlags), sizeof(Header->BootpFlags));
+	UDPPutArray((BYTE*)&(Header->ClientIP), sizeof(Header->ClientIP));
+	UDPPutArray((BYTE*)&(Header->YourIP), sizeof(Header->YourIP));
+	UDPPutArray((BYTE*)&(Header->NextServerIP), sizeof(Header->NextServerIP));
+	UDPPutArray((BYTE*)&(AppConfig.MyIPAddr), sizeof(AppConfig.MyIPAddr));
+	UDPPutArray((BYTE*)&(Header->ClientMAC), sizeof(Header->ClientMAC));
+
+	for (i = 0; i < 64 + 128 + (16 - sizeof(MAC_ADDR)); i++)	// Remaining 10 bytes of client hardware address, server host name: Null string (not used)
+		UDPPut(0x00);									// Boot filename: Null string (not used)
+	UDPPut(0x63);				// Magic Cookie: 0x63538263
+	UDPPut(0x82);				// Magic Cookie: 0x63538263
+	UDPPut(0x53);				// Magic Cookie: 0x63538263
+	UDPPut(0x63);				// Magic Cookie: 0x63538263
+
+	// Message type = REQUEST
+	UDPPut(DHCP_MESSAGE_TYPE);
+	UDPPut(DHCP_MESSAGE_TYPE_LEN);
+	UDPPut(DHCP_ACK_MESSAGE);
 
 	// Subnet mask
 	UDPPut(DHCP_SUBNET_MASK);
