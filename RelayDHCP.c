@@ -291,6 +291,8 @@ void OfferToC(BOOTP_HEADER &clientHeader)
 	UDPIsPutReady(ServerSocket);
 	//---------------
 
+	//Send via broadcast
+	Header->BootpFlags = 0x8000;
 
 	UDPPutArray((BYTE*)&(Header->MessageType), sizeof(Header->MessageType));
 	UDPPutArray((BYTE*)&(Header->HardwareType), sizeof(Header->HardwareType));
@@ -298,9 +300,7 @@ void OfferToC(BOOTP_HEADER &clientHeader)
 	UDPPutArray((BYTE*)&(Header->Hops), sizeof(Header->Hops));
 	UDPPutArray((BYTE*)&(Header->TransactionID), sizeof(Header->TransactionID));
 	UDPPutArray((BYTE*)&(Header->SecondsElapsed), sizeof(Header->SecondsElapsed));
-	//UDPPutArray((BYTE*)&(Header->BootpFlags), sizeof(Header->BootpFlags));
-	// Send via broadcast!
-
+	UDPPutArray((BYTE*)&(Header->BootpFlags), sizeof(Header->BootpFlags));
 	UDPPutArray((BYTE*)&(Header->ClientIP), sizeof(Header->ClientIP));
 	UDPPutArray((BYTE*)&(Header->YourIP), sizeof(Header->YourIP));
 	UDPPutArray((BYTE*)&(Header->NextServerIP), sizeof(Header->NextServerIP));
@@ -316,26 +316,31 @@ void OfferToC(BOOTP_HEADER &clientHeader)
 
 	// Message type = REQUEST
 	UDPPut(DHCP_MESSAGE_TYPE);
-	UDPPut(1);
-	UDPPut(DHCP_REQUEST_MESSAGE);
+	UDPPut(DHCP_MESSAGE_TYPE_LEN);
+	UDPPut(DHCP_OFFER_MESSAGE);
 
-	// Option: Server identifier
-	UDPPut(DHCP_SERVER_IDENTIFIER);
+	// Subnet mask
+	UDPPut(DHCP_SUBNET_MASK);
 	UDPPut(sizeof(IP_ADDR));
-	UDPPutArray((BYTE*)&AppConfig.MyIPAddr, sizeof(IP_ADDR));
+	UDPPutArray((BYTE*)&AppConfig.MyMask, sizeof(IP_ADDR));
 
 	// Option: Router/Gateway address
-	UDPPut(DHCP_ROUTER);
+	UDPPut(DHCP_ROUTER);		
 	UDPPut(sizeof(IP_ADDR));
 	UDPPutArray((BYTE*)&AppConfig.MyIPAddr, sizeof(IP_ADDR));
 
-	//Add the client's requested IP, if there's one available
-	if(RequestedIP)
-	{
-		UDPPut(DHCP_PARAM_REQUEST_IP_ADDRESS);
-		UDPPut(DHCP_PARAM_REQUEST_IP_ADDRESS_LEN);
-		UDPPutArray((BYTE*)&RequestedIP, sizeof(IP_ADDR));
-	}
+	// Option: Lease duration
+	UDPPut(DHCP_IP_LEASE_TIME);
+	UDPPut(4);
+	UDPPut((DHCP_LEASE_DURATION>>24) & 0xFF);
+	UDPPut((DHCP_LEASE_DURATION>>16) & 0xFF);
+	UDPPut((DHCP_LEASE_DURATION>>8) & 0xFF);
+	UDPPut((DHCP_LEASE_DURATION) & 0xFF);
+
+	// Option: Server identifier
+	UDPPut(DHCP_SERVER_IDENTIFIER);	
+	UDPPut(sizeof(IP_ADDR));
+	UDPPutArray((BYTE*)&(Header->NextServerIP), sizeof(Header->NextServerIP));
 
 	// No more options, mark ending
 	UDPPut(DHCP_END_OPTION);
