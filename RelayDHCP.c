@@ -1,6 +1,10 @@
 #define __DHCPS_C
 #define __18F97J60
 #define __SDCC__
+
+#define THIS_INCLUDES_THE_MAIN_FUNCTION
+#define THIS_IS_STACK_APPLICATION
+
 #include <pic18f97j60.h> //ML
 
 #include "Include/TCPIPConfig.h"
@@ -34,6 +38,9 @@ void OfferToC(BOOTP_HEADER *Header);
 void ReqToS(BOOTP_HEADER *Header);
 void AckToC(BOOTP_HEADER *Header);
 void DisplayString(BYTE pos, char* text);
+
+APP_CONFIG AppConfig;
+
 
 BOOL relayEnable = TRUE;
 
