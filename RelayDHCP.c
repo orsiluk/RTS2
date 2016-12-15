@@ -8,6 +8,12 @@
 // #include "TCPIP_Stack/DHCPs.c"
 #include "Include/TCPIP_Stack/DHCP.h"
 #include "Include/TCPIP_Stack/UDP.h"
+
+#include "Include/GenericTypeDefs.h"
+#include "Include/MainDemo.h"
+
+
+
 #include "Include/LCDBlocking.h"
 
 // DHCP Server at 	192.168.2.2
@@ -26,9 +32,23 @@ void ReceiveInput(UDP_SOCKET listen);
 void DiscoveryToS(BOOTP_HEADER *Header);
 void OfferToC(BOOTP_HEADER *Header);
 void ReqToS(BOOTP_HEADER *Header);
-void AccToC(BOOTP_HEADER *Header);
+void AckToC(BOOTP_HEADER *Header);
+void DisplayString(BYTE pos, char* text);
 
 BOOL relayEnable = TRUE;
+
+void DisplayString(BYTE pos, char* text)
+{
+  BYTE        l = strlen(text);/*number of actual chars in the string*/
+  BYTE      max = 32 - pos;  /*available space on the lcd*/
+  char       *d = (char*)&LCDText[pos];
+  const char *s = text;
+  size_t      n = (l < max) ? l : max;
+  /* Copy as many bytes as will fit */
+  if (n != 0)
+    while (n-- != 0)*d++ = *s++;
+  LCDUpdate();
+}
 
 static BOOL getARP() {
 
@@ -64,6 +84,11 @@ static int Receive() {
 	ReceiveInput(SSocket);
 	ReceiveInput(CSocket);
 	UDPDiscard();
+	return 1;
+}
+
+int main(void)
+{
 	return 1;
 }
 
@@ -192,7 +217,7 @@ void ReceiveInput(UDP_SOCKET listen) {
 				break;
 			case DHCP_ACK_MESSAGE:
 				DisplayString(0,"ACK");
-				AccToC(&clientHeader);
+				AckToC(&clientHeader);
 				break;
 			// case DHCP_RELEASE_MESSAGE:
 			// 	DisplayString("RELEASE", "");
