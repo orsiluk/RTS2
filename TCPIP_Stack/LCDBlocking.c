@@ -63,7 +63,7 @@
 
 #include "../Include/HardwareProfile.h"
 #include "../Include/TCPIP_Stack/TCPIP.h" //ML
-//#include "Include/share.h"
+//#include "../Include/share.h"
 
 
 #if defined(USE_LCD)
@@ -86,7 +86,7 @@
 // then call LCDUpdate() to copy the string into the LCD module.
 BYTE LCDText[16*2+1];
 extern void high_isr (void);
-extern unsigned int ticks;
+unsigned int ticks;
 
 /******************************************************************************
  * Function:        static void LCDWrite(BYTE RS, BYTE Data)

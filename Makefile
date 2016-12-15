@@ -87,8 +87,8 @@ APP_HEADERS=Include/GenericTypeDefs.h \
 TCPIP_Demo : $(OBJECTS) 
 	$(LD) $(LDFLAGS) $(OBJECTS)
 
-RelayDHCP : Objects/RelayDHCP.o $(OBJECTS)
-	$(LD) $(LDFLAGS) Objects/RelayDHCP.o $(OBJECTS)
+RelayDHCP : $(OBJECTS)
+	$(LD) $(LDFLAGS) $(OBJECTS)
 
 Objects/RelayDHCP.o : RelayDHCP.c $(SDCC_HEADERS)  \
    $(SDCC_PIC16_HEADERS) $(APP_HEADERS) $(TCPIP_HEADERS)
