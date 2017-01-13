@@ -3,7 +3,6 @@
 #define __SDCC__
 #define THIS_INCLUDES_THE_MAIN_FUNCTION
 #define THIS_IS_STACK_APPLICATION
-#define DHCP_SERVER_IP	0x0101A8C0	//Server IP: 192.168
 #define DHCP_LEASE_DURATION	60ul
 
 #include <pic18f97j60.h>	//ML
@@ -12,79 +11,54 @@
 #include "Include/TCPIP_Stack/DHCP.h"
 #include "Include/TCPIP_Stack/UDP.h"
 #include "Include/GenericTypeDefs.h"
-#include "Include/MainDemo.h"
-#include "Include/LCDBlocking.h"
 
 static 	UDP_SOCKET	CSocket,SSocket;
-static 	NODE_INFO 	DHCPServer;
-BOOL relayEnable = TRUE;
 APP_CONFIG AppConfig;
 
-static  BOOL getARP();
 void ReceiveInput(UDP_SOCKET listen);
 void DiscoveryToS(BOOTP_HEADER *Header);
 void OfferToC(BOOTP_HEADER *Header);
 void ReqToS(BOOTP_HEADER *Header);
 void AckToC(BOOTP_HEADER *Header);
 void DisplayString(BYTE pos, char* text);
+static void InitAppConfig(void);
+static void Receive();
 
-void DisplayString(BYTE pos, char* text)
-{
-  BYTE        l = strlen(text);	/*number of actual chars in the string*/
-  BYTE      max = 32 - pos;  	/*available space on the lcd*/
-  char       *d = (char*)&LCDText[pos];
-  const char *s = text;
-  size_t      n = (l < max) ? l : max;
-  if (n != 0)
-    while (n-- != 0)*d++ = *s++;/* Copy as many bytes as will fit */
-  LCDUpdate();
+int main(void){	
+	// Initialize Stack and application related variables in AppConfig.
+    InitAppConfig();
+
+    // Initialize core stack layers (MAC, ARP, TCP, UDP) and
+    // application modules (HTTP, SNMP, etc.)
+    StackInit();
+
+    LCDInit();
+	
+	DisplayString(0,"START RELAY");
+	while(1)
+		Receive();
+	return 1;
 }
 
-static BOOL getARP() {
-	ARPResolve(&DHCPServer.IPAddr);
-	return ARPIsResolved(&DHCPServer.IPAddr, &DHCPServer.MACAddr);
-}
-
-static int Receive() {
-
-	if (relayEnable == FALSE) return 0;
+static void Receive(){
 	CSocket = UDPOpen(DHCP_SERVER_PORT, NULL, DHCP_CLIENT_PORT);
 	SSocket = UDPOpen(DHCP_CLIENT_PORT, NULL, DHCP_SERVER_PORT);
-	if (CSocket == INVALID_UDP_SOCKET || SSocket == INVALID_UDP_SOCKET) {
+	if (CSocket == INVALID_UDP_SOCKET)
+	{
 		LCDErase();
-		DisplayString(0 , "Socket ERROR!");
-		return 0;
-	} else {
+		DisplayString(0 , "Client Socket Error!");
+		return;
+	}
+	else if(SSocket == INVALID_UDP_SOCKET)
+	{
 		LCDErase();
-		DisplayString(0, "Socket success");
+		DisplayString(0 , "Server Socket Error!");
+		return;
 	}
 	ReceiveInput(SSocket);	// Start listening
 	ReceiveInput(CSocket);
 	UDPDiscard();
-	return 1;
-}
-
-int main(void)
-{	
-	UDP_SOCKET MySocket;
-	getARP();
-	LCDInit();
-	
-	DisplayString(0,"START RELAY");
-	while(1)
-	{
-		MySocket = UDPOpen(DHCP_SERVER_PORT, NULL, DHCP_CLIENT_PORT);
-		while(MySocket == INVALID_UDP_SOCKET)
-		{
-			MySocket = UDPOpen(DHCP_SERVER_PORT, NULL, DHCP_CLIENT_PORT);
-			DisplayString (0,"Invalid socket");
-			if(MySocket != INVALID_UDP_SOCKET)
-				break;
-		}
-		DisplayString (16,"Valid socket");
-		ReceiveInput(MySocket);
-	}
-	return 1;
+	return;
 }
 
 void ReceiveInput(UDP_SOCKET listen) {
@@ -102,8 +76,7 @@ void ReceiveInput(UDP_SOCKET listen) {
 	if (dw != 0x63538263ul)
 		return;
 
-	while (1)
-	{
+	while (1){
 		if (!UDPGet(&Option))	// Get option type
 			break;
 		if (Option == DHCP_END_OPTION)
@@ -154,21 +127,11 @@ void OfferToC(BOOTP_HEADER *Header)
 {
 	BYTE i,a;
 	DWORD RequestedIP = 0;
-	UDP_SOCKET_INFO* p;
 
 	// Set the correct socket to active and ensure that
 	// enough space is available to generate the DHCP response
 	if (UDPIsPutReady(CSocket) < 300u)
 		return;
-
-	//REMOVE THIS???
-	p = &UDPSocketInfo[activeUDPSocket];
-	p->remoteNode.IPAddr.Val = DHCPServer.IPAddr.Val;
-	for(a = 0; a < 6; a++){
-		p->remoteNode.MACAddr.v[a] = DHCPServer.MACAddr.v[a];
-	}
-	UDPIsPutReady(SSocket);
-	//---------------
 
 	Header->BootpFlags = 0x8000;	//Send via broadcast
 
@@ -185,8 +148,8 @@ void OfferToC(BOOTP_HEADER *Header)
 	UDPPutArray((BYTE*)&(AppConfig.MyIPAddr), sizeof(AppConfig.MyIPAddr));
 	UDPPutArray((BYTE*)&(Header->ClientMAC), sizeof(Header->ClientMAC));
 
-	/ Remaining 10 bytes of client hardware address, server host name: Null string (not used)
-	for (i = 0; i < 64 + 128 + (16 - sizeof(MAC_ADDR)); i++)	/
+	// Remaining 10 bytes of client hardware address, server host name: Null string (not used)
+	for (i = 0; i < 64 + 128 + (16 - sizeof(MAC_ADDR)); i++)
 		UDPPut(0x00);									// Boot filename: Null string (not used)
 	UDPPut(0x63);				// Magic Cookie: 0x63538263
 	UDPPut(0x82);				// Magic Cookie: 0x63538263
@@ -229,21 +192,11 @@ void AckToC(BOOTP_HEADER *Header)
 {
 	BYTE i,a;
 	DWORD RequestedIP = 0;
-	UDP_SOCKET_INFO *p;
 
 	// Set the correct socket to active and ensure that
 	// enough space is available to generate the DHCP response
 	if (UDPIsPutReady(CSocket) < 300u)
 		return;
-
-	//REMOVE THIS???
-	p = &UDPSocketInfo[activeUDPSocket];
-	p->remoteNode.IPAddr.Val = DHCPServer.IPAddr.Val;
-	for(a = 0; a < 6; a++){
-		p->remoteNode.MACAddr.v[a] = DHCPServer.MACAddr.v[a];
-	}
-	UDPIsPutReady(SSocket);
-	//---------------
 
 	Header->BootpFlags = 0x0000;	//Send via unicast
 
@@ -353,7 +306,6 @@ void DiscoveryToS(BOOTP_HEADER *Header) {
 void ReqToS(BOOTP_HEADER *Header) {
 	BYTE i,a;
 	DWORD RequestedIP = 0;
-	UDP_SOCKET_INFO *p;
 
 	// Set the correct socket to active and ensure that
 	// enough space is available to generate the DHCP response
@@ -385,15 +337,6 @@ void ReqToS(BOOTP_HEADER *Header) {
 		while(Len--)	// Remove the unprocessed bytes that we don't care about
 			UDPGet(&i);
 	}
-
-	//REMOVE THIS???
-	p = &UDPSocketInfo[activeUDPSocket];
-	p->remoteNode.IPAddr.Val = DHCPServer.IPAddr.Val;
-	for(a = 0; a < 6; a++){
-		p->remoteNode.MACAddr.v[a] = DHCPServer.MACAddr.v[a];
-	}
-	UDPIsPutReady(SSocket);
-	//---------------
 
 	UDPPutArray((BYTE*)&(Header->MessageType), sizeof(Header->MessageType));
 	UDPPutArray((BYTE*)&(Header->HardwareType), sizeof(Header->HardwareType));
@@ -448,62 +391,49 @@ void ReqToS(BOOTP_HEADER *Header) {
 	UDPFlush();	// Transmit the packet
 }
 
-/*
-void MessageToServer(BOOTP_HEADER *Header, BYTE messageType) {
-	BYTE i;
-
-	if(messageType != DHCP_DISCOVER_MESSAGE || messageType != DHCP_REQUEST_MESSAGE)
-		return;	//If messageType is not Discovery or Request, something's up..
-
-	// Set the correct socket to active and ensure that
-	// enough space is available to generate the DHCP response
-	if (UDPIsPutReady(SSocket) < 300u)
-		return;
-
-	UDPPutArray((BYTE*)&(Header->MessageType), sizeof(Header->MessageType));
-	UDPPutArray((BYTE*)&(Header->HardwareType), sizeof(Header->HardwareType));
-	UDPPutArray((BYTE*)&(Header->HardwareLen), sizeof(Header->HardwareLen));
-	UDPPutArray((BYTE*)&(Header->Hops), sizeof(Header->Hops));
-	UDPPutArray((BYTE*)&(Header->TransactionID), sizeof(Header->TransactionID));
-	UDPPutArray((BYTE*)&(Header->SecondsElapsed), sizeof(Header->SecondsElapsed));
-	UDPPutArray((BYTE*)&(Header->BootpFlags), sizeof(Header->BootpFlags));
-	UDPPutArray((BYTE*)&(Header->ClientIP), sizeof(Header->ClientIP));
-	UDPPutArray((BYTE*)&(Header->YourIP), sizeof(Header->YourIP));
-	UDPPutArray((BYTE*)&(Header->NextServerIP), sizeof(Header->NextServerIP));
-	UDPPutArray((BYTE*)&(AppConfig.MyIPAddr), sizeof(AppConfig.MyIPAddr));
-	UDPPutArray((BYTE*)&(Header->ClientMAC), sizeof(Header->ClientMAC));
-
-	// Remaining 10 bytes of client hardware address, server host name: Null string (not used)
-	for (i = 0; i < 64 + 128 + (16 - sizeof(MAC_ADDR)); i++)	
-		UDPPut(0x00);									// Boot filename: Null string (not used)
-	UDPPut(0x63);				// Magic Cookie: 0x63538263
-	UDPPut(0x82);				// Magic Cookie: 0x63538263
-	UDPPut(0x53);				// Magic Cookie: 0x63538263
-	UDPPut(0x63);				// Magic Cookie: 0x63538263
-
-	// Set the message type (can be DISCOVER or REQUEST)
-	UDPPut(DHCP_MESSAGE_TYPE);
-	UDPPut(1);
-	UDPPut(messageType);
-
-	// Option: Server identifier
-	UDPPut(DHCP_SERVER_IDENTIFIER);
-	UDPPut(sizeof(IP_ADDR));
-	UDPPutArray((BYTE*)&AppConfig.MyIPAddr, sizeof(IP_ADDR));
-
-	// Option: Router/Gateway address
-	UDPPut(DHCP_ROUTER);
-	UDPPut(sizeof(IP_ADDR));
-	UDPPutArray((BYTE*)&AppConfig.MyIPAddr, sizeof(IP_ADDR));
-
-	// No more options, mark ending
-	UDPPut(DHCP_END_OPTION);
-
-	// Add zero padding to ensure compatibility with old BOOTP relays that discard small packets (<300 UDP octets)
-	while (UDPTxCount < 300u)
-		UDPPut(0);
-
-	// Transmit the packet
-	UDPFlush();
+void DisplayString(BYTE pos, char* text){
+  BYTE        l = strlen(text);	/*number of actual chars in the string*/
+  BYTE      max = 32 - pos;  	/*available space on the lcd*/
+  char       *d = (char*)&LCDText[pos];
+  const char *s = text;
+  size_t      n = (l < max) ? l : max;
+  if (n != 0)
+    while (n-- != 0)*d++ = *s++;/* Copy as many bytes as will fit */
+  LCDUpdate();
 }
-*/
+
+static void InitAppConfig(void)
+{
+	AppConfig.Flags.bIsDHCPEnabled = TRUE;
+	AppConfig.Flags.bInConfigMode = TRUE;
+
+//ML using sdcc (MPLAB has a trick to generate serial numbers)
+// first 3 bytes indicate manufacturer; last 3 bytes are serial number
+	AppConfig.MyMACAddr.v[0] = 0;
+	AppConfig.MyMACAddr.v[1] = 0x04;
+	AppConfig.MyMACAddr.v[2] = 0xA3;
+	AppConfig.MyMACAddr.v[3] = 0x01;
+	AppConfig.MyMACAddr.v[4] = 0x02;
+	AppConfig.MyMACAddr.v[5] = 0x03;
+
+//ML if you want to change, see TCPIPConfig.h
+	AppConfig.MyIPAddr.Val = MY_DEFAULT_IP_ADDR_BYTE1 | 
+            MY_DEFAULT_IP_ADDR_BYTE2<<8ul | MY_DEFAULT_IP_ADDR_BYTE3<<16ul | 
+            MY_DEFAULT_IP_ADDR_BYTE4<<24ul;
+	AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
+	AppConfig.MyMask.Val = MY_DEFAULT_MASK_BYTE1 | 
+            MY_DEFAULT_MASK_BYTE2<<8ul | MY_DEFAULT_MASK_BYTE3<<16ul | 
+            MY_DEFAULT_MASK_BYTE4<<24ul;
+	AppConfig.DefaultMask.Val = AppConfig.MyMask.Val;
+	AppConfig.MyGateway.Val = MY_DEFAULT_GATE_BYTE1 | 
+            MY_DEFAULT_GATE_BYTE2<<8ul | MY_DEFAULT_GATE_BYTE3<<16ul | 
+            MY_DEFAULT_GATE_BYTE4<<24ul;
+	AppConfig.PrimaryDNSServer.Val = MY_DEFAULT_PRIMARY_DNS_BYTE1 | 
+            MY_DEFAULT_PRIMARY_DNS_BYTE2<<8ul  | 
+            MY_DEFAULT_PRIMARY_DNS_BYTE3<<16ul  | 
+            MY_DEFAULT_PRIMARY_DNS_BYTE4<<24ul;
+	AppConfig.SecondaryDNSServer.Val = MY_DEFAULT_SECONDARY_DNS_BYTE1 | 
+            MY_DEFAULT_SECONDARY_DNS_BYTE2<<8ul  | 
+            MY_DEFAULT_SECONDARY_DNS_BYTE3<<16ul  | 
+            MY_DEFAULT_SECONDARY_DNS_BYTE4<<24ul;
+}
